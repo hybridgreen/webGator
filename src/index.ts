@@ -1,12 +1,16 @@
 import { setUser, readConfig, Config} from "./config";
-import { type CommandsRegistry, loginHandler, registerCommand, runCommand, registerUserHandler} from "./commands";
+import { type CommandsRegistry, registerCommand, runCommand} from "./commands";
+import * as utils from "./commands";
+
 
 async function main() {
   //console.log("[main] starting. argv =", process.argv.slice(2));
   const registry: CommandsRegistry = {};
 
-  registerCommand(registry, "login", loginHandler);
-  registerCommand(registry, "register", registerUserHandler);
+  registerCommand(registry, "login", utils.loginHandler);
+  registerCommand(registry, "register", utils.registerUserHandler);
+  registerCommand(registry, "reset", utils.resetHandler);
+  registerCommand(registry, "users", utils.listHandler);
 
   const args = process.argv.slice(2);
   if (args.length < 1) {

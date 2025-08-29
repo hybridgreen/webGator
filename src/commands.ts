@@ -1,6 +1,7 @@
 import { error } from "console";
 import { setUser, readConfig } from "./config";
-import {createUser, fetchUser} from 'src/lib/db/queries/users'
+import {createUser, fetchUser, resetDB, getUsers} from 'src/lib/db/queries/users'
+import { read } from "fs";
 
 type CommandHandler = (cmdName : string, ...args: string[]) => Promise<void>
 export type CommandsRegistry = Record<string,CommandHandler>
@@ -61,3 +62,19 @@ export async function registerUserHandler(cmdName:string, ...args: string[]) {
     }
 }
 
+export async function resetHandler(cmdName:string) {
+    console.log('Resetting database');
+    await resetDB();
+}
+export async function listHandler(cmdName:string) {
+    const userNames = await getUsers();
+    for (const obj of userNames[0]){
+        if(obj.name === readConfig().currentUserName){
+            console.log('*',obj.name, '(current)');
+        }
+        else{
+            console.log('*',obj.name);
+        }
+
+    };
+}
