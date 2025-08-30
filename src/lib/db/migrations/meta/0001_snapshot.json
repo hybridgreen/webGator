@@ -1,6 +1,6 @@
 {
-  "id": "082b8164-5544-4dd4-862e-28a75941c7d8",
-  "prevId": "06767d58-174a-4856-aa1c-22b0c63c1beb",
+  "id": "829f4ca9-0c82-4430-85dc-2dad83a83a44",
+  "prevId": "082b8164-5544-4dd4-862e-28a75941c7d8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -11,8 +11,9 @@
         "id": {
           "name": "id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
@@ -23,6 +24,12 @@
         "url": {
           "name": "url",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -43,12 +50,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "feeds_id_users_id_fk": {
-          "name": "feeds_id_users_id_fk",
+        "feeds_user_id_users_id_fk": {
+          "name": "feeds_user_id_users_id_fk",
           "tableFrom": "feeds",
           "tableTo": "users",
           "columnsFrom": [
-            "id"
+            "user_id"
           ],
           "columnsTo": [
             "id"

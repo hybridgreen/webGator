@@ -2,7 +2,8 @@
 import { setUser, readConfig } from "./config";
 import {createUser, fetchUser, resetDB, getUsers} from 'src/lib/db/queries/users'
 import { XMLParser } from "fast-xml-parser";
-import { error } from "console";
+import { addFeed } from "./lib/db/queries/feeds";
+import { type Feed , type User} from "./lib/db/schema";
 
 type RSSFeed = {
   channel: {
@@ -99,8 +100,14 @@ function processItem(item: any): RSSItem | undefined{
     }
     return undefined;
 }
-
-
+function printFeed(feed: Feed, user: User) {
+  console.log(`* ID:            ${feed.id}`);
+  console.log(`* Created:       ${feed.created_at}`);
+  console.log(`* Updated:       ${feed.updated_at}`);
+  console.log(`* name:          ${feed.name}`);
+  console.log(`* URL:           ${feed.url}`);
+  console.log(`* User:          ${user.name}`);
+}
 
 // Command handlers 
 export async function loginHandler (cmdName: string, ...args: string[]){
@@ -117,7 +124,6 @@ export async function loginHandler (cmdName: string, ...args: string[]){
     setUser(args[0]);
     console.log(`User ${args[0]}, logged in successfully`);
 }
-
 export async function registerUserHandler(cmdName:string, ...args: string[]) {
     //console.log("Reached registerUserHandler");
     if (args.length === 0){
@@ -135,7 +141,6 @@ export async function registerUserHandler(cmdName:string, ...args: string[]) {
         console.log(await fetchUser(name));
     }
 }
-
 export async function resetHandler(cmdName:string) {
     console.log('Resetting database');
     await resetDB();
@@ -152,11 +157,33 @@ export async function listHandler(cmdName:string) {
 
     };
 }
-
 export async function aggHandler(cmdName:string) {
     const rssFeed = await fetchFeed('https://www.wagslane.dev/index.xml');
     console.log(rssFeed);
     for(const item of rssFeed.channel.item){
         console.log(item);
     }
+}
+export async function addFeedHandler(cmdName: string, ...args:string[]){
+    if(!readConfig().currentUserName){
+        throw new Error('Error, no user logged in.')
+    }
+    const name = args[0];
+    if(!name || name.trim()=== ''){
+        throw new Error('Error adding Feed. Please provide a username');
+    }
+    const url = args[1];
+    if(!url || url.trim()=== ''){
+        throw new Error('Error adding Feed. Please provide a URL.');
+    }
+    const user = await fetchUser(readConfig().currentUserName);
+
+    if(!user){
+        throw new Error('Error, user not found.')
+    }
+
+    //const feed = await fetchFeed(url.trim());
+
+    const feed = await addFeed(name, url, user.id);
+    printFeed(feed, user);
 }

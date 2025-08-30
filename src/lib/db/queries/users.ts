@@ -1,7 +1,8 @@
-import { error } from 'console';
+
 import {db} from '..';
 import { users } from '../schema';
 import { eq } from 'drizzle-orm';
+
 
 export async function createUser(name: string){
     //console.log("Reached createUser, about to insert:", name);

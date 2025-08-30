@@ -12,6 +12,7 @@ async function main() {
   registerCommand(registry, "reset", utils.resetHandler);
   registerCommand(registry, "users", utils.listHandler);
   registerCommand(registry, "agg", utils.aggHandler);
+  registerCommand(registry, "addfeed", utils.addFeedHandler);
 
   const args = process.argv.slice(2);
   if (args.length < 1) {
