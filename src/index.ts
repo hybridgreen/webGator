@@ -1,6 +1,6 @@
 import { setUser, readConfig, Config} from "./config";
 import { type CommandsRegistry, registerCommand, runCommand} from "./commands";
-import * as utils from "./commands";
+import * as utils from "./utils";
 
 
 async function main() {
@@ -11,6 +11,7 @@ async function main() {
   registerCommand(registry, "register", utils.registerUserHandler);
   registerCommand(registry, "reset", utils.resetHandler);
   registerCommand(registry, "users", utils.listHandler);
+  registerCommand(registry, "agg", utils.aggHandler);
 
   const args = process.argv.slice(2);
   if (args.length < 1) {
@@ -18,7 +19,7 @@ async function main() {
     process.exit(1);
   }
 
-  const commandName = args[0];
+  const commandName = args[0].toLowerCase();
   //console.log("[main] about to run:", commandName, "with", args.slice(1));
 
   try {
