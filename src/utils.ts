@@ -2,7 +2,7 @@
 import { setUser, readConfig } from "./config";
 import {createUser, getUser, resetDB, getUsers, getUserbyID} from 'src/lib/db/queries/users'
 import { XMLParser } from "fast-xml-parser";
-import { addFeed, fetchFeeds } from "./lib/db/queries/feeds";
+import { addFeed, getFeeds, getFeed, createFeedFollow, getFeedFollowsForUser, getFeedbyID } from "./lib/db/queries/feeds";
 import { type Feed , type User} from "./lib/db/schema";
 
 type RSSFeed = {
@@ -20,8 +20,6 @@ type RSSItem = {
     description: string,
     pubDate: string
 };
-
-
 // utilities
 
 async function fetchFeed(feedURL:string): Promise<RSSFeed>{
@@ -84,7 +82,6 @@ async function fetchFeed(feedURL:string): Promise<RSSFeed>{
     }
     return RSSObj;
 }
-
 function processItem(item: any): RSSItem | undefined{
     if(item.title && item.title.trim() !== '' 
     && item.link && item.link.trim() !== '' 
@@ -106,9 +103,8 @@ function printFeed(feed: Feed, user: User) {
   console.log(`* Updated:       ${feed.updated_at}`);
   console.log(`* name:          ${feed.name}`);
   console.log(`* URL:           ${feed.url}`);
-  console.log(`* User:          ${user.name}`);
+  console.log(`* Created by:          ${user.name}`);
 }
-
 // Command handlers 
 export async function loginHandler (cmdName: string, ...args: string[]){
     if (args.length === 0){
@@ -164,32 +160,9 @@ export async function aggHandler(cmdName:string) {
         console.log(item);
     }
 }
-export async function addFeedHandler(cmdName: string, ...args:string[]){
-    if(!readConfig().currentUserName){
-        throw new Error('Error, no user logged in.')
-    }
-    const name = args[0];
-    if(!name || name.trim()=== ''){
-        throw new Error('Error adding Feed. Please provide a username');
-    }
-    const url = args[1];
-    if(!url || url.trim()=== ''){
-        throw new Error('Error adding Feed. Please provide a URL.');
-    }
-    const user = await getUser(readConfig().currentUserName);
-
-    if(!user){
-        throw new Error('Error, user not found.')
-    }
-    //const feed = await fetchFeed(url.trim());
-
-    const feed = await addFeed(name, url, user.id);
-    printFeed(feed, user);
-}
 export async function feedsHandler(cmdName:string) {
 
-
-    const feeds = await fetchFeeds();
+    const feeds = await getFeeds();
     //console.log('[Debug]','Feed: ',feeds);
     
     for(const item of feeds){
@@ -199,4 +172,43 @@ export async function feedsHandler(cmdName:string) {
         printFeed(item, user);
     }
 
+}
+// UserCommandHandlers
+export async function addFeedHandler(cmdName: string, user: User , ...args:string[]){
+    const name = args[0];
+    if(!name || name.trim()=== ''){
+        throw new Error('Error adding Feed. Please provide a username');
+    }
+    const url = args[1];
+    if(!url || url.trim()=== ''){
+        throw new Error('Error adding Feed. Please provide a URL.');
+    }
+
+    const feed = await addFeed(name, url, user.id);
+
+    const feedFollow = await createFeedFollow(feed.id, user.id);
+    console.log('User' , feedFollow.users.name,
+                '\nNow following: ', printFeed(feed, user),
+                '\nRecord:', feedFollow.feeds_follow);
+}
+
+export async function followHandler(cmdName: string, user: User , ...args:string[]){
+    if(args.length === 0 || args[0].trim() === ''){
+        throw new Error('Error. Please provide a URL.');
+    }
+    const url = args[0];
+
+    const feed = await getFeed(url);
+
+    const result = await createFeedFollow(feed.id, user.id);
+    console.log('User' , result.users.name,
+                '\nNow following: ', printFeed(feed, result.users),
+                '\nRecord:', result.feeds_follow);
+}
+export async function followingHandler(cmdName:string, user: User) {
+    const follows =  await getFeedFollowsForUser(user.id);
+    for(const item of follows){
+        const feed = await getFeedbyID(item.feed_id);
+        printFeed(feed, user);
+    }
 }

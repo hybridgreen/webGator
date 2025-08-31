@@ -15,6 +15,13 @@
       "when": 1756558686763,
       "tag": "0001_solid_hemingway",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756604147775,
+      "tag": "0002_equal_dreadnoughts",
+      "breakpoints": true
     }
   ]
 }

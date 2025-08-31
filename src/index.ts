@@ -1,5 +1,5 @@
 import { setUser, readConfig, Config} from "./config";
-import { type CommandsRegistry, registerCommand, runCommand} from "./commands";
+import { type CommandsRegistry, registerCommand, runCommand, userLoggedIn} from "./commands";
 import * as utils from "./utils";
 
 
@@ -12,8 +12,11 @@ async function main() {
   registerCommand(registry, "reset", utils.resetHandler);
   registerCommand(registry, "users", utils.listHandler);
   registerCommand(registry, "agg", utils.aggHandler);
-  registerCommand(registry, "addfeed", utils.addFeedHandler);
   registerCommand(registry, "feeds", utils.feedsHandler);
+
+  registerCommand(registry, "addfeed", userLoggedIn(utils.addFeedHandler));
+  registerCommand(registry, "follow", userLoggedIn(utils.followHandler));
+  registerCommand(registry, "following", userLoggedIn(utils.followingHandler));
 
   const args = process.argv.slice(2);
   if (args.length < 1) {
@@ -26,7 +29,7 @@ async function main() {
 
   try {
     await runCommand(registry, commandName, ...args.slice(1));
-    //console.log("[main] runCommand returned");
+    console.log("[main] runCommand returned");
   } catch (e) {
     console.error("[main] runCommand threw:", e);
     process.exit(1);
