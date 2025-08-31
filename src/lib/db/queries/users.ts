@@ -1,4 +1,5 @@
 
+import { UUID } from 'crypto';
 import {db} from '..';
 import { users } from '../schema';
 import { eq } from 'drizzle-orm';
@@ -18,7 +19,7 @@ export async function createUser(name: string){
     }
 }
 
-export async function fetchUser(name:string) {
+export async function getUser(name:string) {
     //console.log("Reached fetchUser, about to fetch:", name);
     const[result] = await db.select().from(users).where(eq(users.name, name));
     return result;
@@ -44,4 +45,9 @@ export async function getUsers() {
         console.log("Error in getUsers:", error);
         throw error;
     }
+}
+
+export async function getUserbyID(user_id:string) {
+    const [result] = await db.select().from(users).where(eq(users.id, user_id));
+    return result;
 }

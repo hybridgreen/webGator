@@ -1,8 +1,8 @@
 
 import { setUser, readConfig } from "./config";
-import {createUser, fetchUser, resetDB, getUsers} from 'src/lib/db/queries/users'
+import {createUser, getUser, resetDB, getUsers, getUserbyID} from 'src/lib/db/queries/users'
 import { XMLParser } from "fast-xml-parser";
-import { addFeed } from "./lib/db/queries/feeds";
+import { addFeed, fetchFeeds } from "./lib/db/queries/feeds";
 import { type Feed , type User} from "./lib/db/schema";
 
 type RSSFeed = {
@@ -118,7 +118,7 @@ export async function loginHandler (cmdName: string, ...args: string[]){
     if (args.length > 1 ){
         console.log(`Extra arguments provided. Your username is ${args[0]}`);
     }
-    if(!await fetchUser(args[0])){
+    if(!await getUser(args[0])){
         throw new Error('User does not exist, please enter a valid user.')
     }
     setUser(args[0]);
@@ -130,7 +130,7 @@ export async function registerUserHandler(cmdName:string, ...args: string[]) {
         throw new Error('Invalid arguments, please provide a username');
     }
     const name = args[0]
-    if(await fetchUser(name)){
+    if(await getUser(name)){
         throw new Error('User already exists');
     }
     else{
@@ -138,7 +138,7 @@ export async function registerUserHandler(cmdName:string, ...args: string[]) {
         await createUser(name);
         setUser(name);
         console.log(`User ${name} created successfully`);
-        console.log(await fetchUser(name));
+        console.log(await getUser(name));
     }
 }
 export async function resetHandler(cmdName:string) {
@@ -176,14 +176,27 @@ export async function addFeedHandler(cmdName: string, ...args:string[]){
     if(!url || url.trim()=== ''){
         throw new Error('Error adding Feed. Please provide a URL.');
     }
-    const user = await fetchUser(readConfig().currentUserName);
+    const user = await getUser(readConfig().currentUserName);
 
     if(!user){
         throw new Error('Error, user not found.')
     }
-
     //const feed = await fetchFeed(url.trim());
 
     const feed = await addFeed(name, url, user.id);
     printFeed(feed, user);
+}
+export async function feedsHandler(cmdName:string) {
+
+
+    const feeds = await fetchFeeds();
+    //console.log('[Debug]','Feed: ',feeds);
+    
+    for(const item of feeds){
+        //console.log(item.name, item.user_id);
+        const user = await getUserbyID(item.user_id)
+        //console.log('Fetched user:', user);
+        printFeed(item, user);
+    }
+
 }

@@ -13,6 +13,7 @@ async function main() {
   registerCommand(registry, "users", utils.listHandler);
   registerCommand(registry, "agg", utils.aggHandler);
   registerCommand(registry, "addfeed", utils.addFeedHandler);
+  registerCommand(registry, "feeds", utils.feedsHandler);
 
   const args = process.argv.slice(2);
   if (args.length < 1) {
