@@ -1,6 +1,6 @@
 import {db} from '..';
 import { type Feed, feeds, feeds_follow, users } from '../schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 
 export async function addFeed(name:string, url: string, user_id: string) {
@@ -52,4 +52,10 @@ export async function getFeedFollowsForUser(user_id:string) {
         .where(eq(feeds_follow.user_id,user_id))
     //console.log('Query returned with: ', feedFollows);
     return feedFollows;
+}
+
+export async function deleteFeedFollow(user_id :string, feed_id:string) {
+    //console.log("Reached deleteFeedFollow");
+    const [deleted] = await db.delete(feeds_follow).where(and(eq(feeds_follow.user_id, user_id), eq(feeds_follow.feed_id , feed_id))).returning();
+    return deleted;
 }

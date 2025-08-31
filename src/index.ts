@@ -17,6 +17,7 @@ async function main() {
   registerCommand(registry, "addfeed", userLoggedIn(utils.addFeedHandler));
   registerCommand(registry, "follow", userLoggedIn(utils.followHandler));
   registerCommand(registry, "following", userLoggedIn(utils.followingHandler));
+  registerCommand(registry, "unfollow", userLoggedIn(utils.unfollowHandler));
 
   const args = process.argv.slice(2);
   if (args.length < 1) {

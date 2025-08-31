@@ -2,7 +2,7 @@
 import { setUser, readConfig } from "./config";
 import {createUser, getUser, resetDB, getUsers, getUserbyID} from 'src/lib/db/queries/users'
 import { XMLParser } from "fast-xml-parser";
-import { addFeed, getFeeds, getFeed, createFeedFollow, getFeedFollowsForUser, getFeedbyID } from "./lib/db/queries/feeds";
+import { addFeed, getFeeds, getFeed, createFeedFollow, getFeedFollowsForUser, getFeedbyID, deleteFeedFollow } from "./lib/db/queries/feeds";
 import { type Feed , type User} from "./lib/db/schema";
 
 type RSSFeed = {
@@ -103,7 +103,7 @@ function printFeed(feed: Feed, user: User) {
   console.log(`* Updated:       ${feed.updated_at}`);
   console.log(`* name:          ${feed.name}`);
   console.log(`* URL:           ${feed.url}`);
-  console.log(`* Created by:          ${user.name}`);
+  console.log(`* Created by:    ${user.name}`);
 }
 // Command handlers 
 export async function loginHandler (cmdName: string, ...args: string[]){
@@ -185,13 +185,11 @@ export async function addFeedHandler(cmdName: string, user: User , ...args:strin
     }
 
     const feed = await addFeed(name, url, user.id);
-
     const feedFollow = await createFeedFollow(feed.id, user.id);
     console.log('User' , feedFollow.users.name,
-                '\nNow following: ', printFeed(feed, user),
+                '\nNow following: ', feedFollow.feeds.name,
                 '\nRecord:', feedFollow.feeds_follow);
 }
-
 export async function followHandler(cmdName: string, user: User , ...args:string[]){
     if(args.length === 0 || args[0].trim() === ''){
         throw new Error('Error. Please provide a URL.');
@@ -211,4 +209,13 @@ export async function followingHandler(cmdName:string, user: User) {
         const feed = await getFeedbyID(item.feed_id);
         printFeed(feed, user);
     }
+}
+export async function unfollowHandler(cmdName:string,user: User, ...args: string[]) {
+    const url = args[0];
+    if(!url){
+        throw new Error('Error: No URL provided.');
+    }
+    const feed = await getFeed(url);
+    const deleted = await deleteFeedFollow(user.id, feed.id);
+    console.log('Unfollowed: ', (await getFeedbyID(deleted.feed_id)).name,'for', user.name );
 }
