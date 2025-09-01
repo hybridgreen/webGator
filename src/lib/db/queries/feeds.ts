@@ -1,6 +1,6 @@
 import {db} from '..';
 import { type Feed, feeds, feeds_follow, users } from '../schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 
 export async function addFeed(name:string, url: string, user_id: string) {
@@ -58,4 +58,18 @@ export async function deleteFeedFollow(user_id :string, feed_id:string) {
     //console.log("Reached deleteFeedFollow");
     const [deleted] = await db.delete(feeds_follow).where(and(eq(feeds_follow.user_id, user_id), eq(feeds_follow.feed_id , feed_id))).returning();
     return deleted;
+}
+
+export async function markFeedFetched(feed_id:string){
+    const [record] = await db.update(feeds)
+        .set({last_fetched_at: new Date(), updated_at: new Date()})
+        .where(eq(feeds.id, feed_id))
+}
+
+export async function getNextFeedToFetch(){
+    const [feed] = await db.select()
+        .from(feeds)
+        .orderBy(sql`${feeds.last_fetched_at} ASC NULLS FIRST`)
+        .limit(1);
+    return feed;
 }

@@ -30,13 +30,12 @@ async function main() {
 
   try {
     await runCommand(registry, commandName, ...args.slice(1));
-    console.log("[main] runCommand returned");
   } catch (e) {
     console.error("[main] runCommand threw:", e);
     process.exit(1);
   }
 
-  console.log("[main] exiting");
+  //console.log("[main] exiting");
   process.exit(0);
 }
 
