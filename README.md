@@ -74,106 +74,117 @@ npm run start <command> [options]
 
 ### Authentication & User Management
 
-#### `login`
-Log in to an existing user account.
+<details>
+<summary><code>login</code> – Log in to an existing user account</summary>
 
 ```bash
 npm run start login
 ```
+</details>
 
 ---
 
-#### `register`
-Create a new user account.
+<details>
+<summary><code>register</code> – Create a new user account</summary>
 
 ```bash
 npm run start register
 ```
+</details>
 
 ---
 
-#### `reset`
-Reset the database (dangerous — wipes users, feeds, and follows).
+<details>
+<summary><code>reset</code> – Reset the database (⚠ wipes users, feeds, and follows)</summary>
 
 ```bash
 npm run start reset
 ```
+</details>
 
 ---
 
-#### `users`
-List all registered users.
+<details>
+<summary><code>users</code> – List all registered users</summary>
 
 ```bash
 npm run start users
 ```
+</details>
 
 ---
 
 ### Feed Aggregation
 
-#### `agg`
-Aggregate (fetch) all feeds and update the local database with the latest posts.
+<details>
+<summary><code>agg</code> – Fetch and update all feeds with the latest posts</summary>
 
 ```bash
 npm run start agg
 ```
+</details>
 
 ---
 
-#### `feeds`
-List all available feeds in the system.
+<details>
+<summary><code>feeds</code> – List all available feeds in the system</summary>
 
 ```bash
 npm run start feeds
 ```
+</details>
 
 ---
 
 ### Feed & Follow Management (requires login)
 
-#### `addfeed`
-Add a new RSS/Atom feed to the system.
+<details>
+<summary><code>addfeed &lt;url&gt;</code> – Add a new RSS/Atom feed</summary>
 
 ```bash
 npm run start addfeed <url>
 ```
+</details>
 
 ---
 
-#### `follow`
-Follow a feed so that its posts show up in your personal browse view.
+<details>
+<summary><code>follow &lt;feed_id&gt;</code> – Follow a feed by its ID</summary>
 
 ```bash
 npm run start follow <feed_id>
 ```
+</details>
 
 ---
 
-#### `following`
-List the feeds you are currently following.
+<details>
+<summary><code>following</code> – List feeds you are currently following</summary>
 
 ```bash
 npm run start following
 ```
+</details>
 
 ---
 
-#### `unfollow`
-Unfollow a feed.
+<details>
+<summary><code>unfollow &lt;feed_id&gt;</code> – Unfollow a feed</summary>
 
 ```bash
 npm run start unfollow <feed_id>
 ```
+</details>
 
 ---
 
-#### `browse`
-Browse posts from the feeds you follow.
+<details>
+<summary><code>browse</code> – Browse posts from your followed feeds</summary>
 
 ```bash
 npm run start browse
 ```
+</details>
 
 ---
 
