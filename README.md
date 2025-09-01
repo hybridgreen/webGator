@@ -20,9 +20,6 @@ npm run start login
 # 4. Add a feed
 npm run start addfeed https://example.com/rss
 
-# 5. Follow the feed
-npm run start follow 1
-
 # 6. Aggregate posts
 npm run start agg
 
@@ -45,9 +42,9 @@ npm run start browse
 | `agg`         | Fetch and update all feeds with the latest posts |
 | `feeds`       | List all available feeds in the system |
 | `addfeed <url>` | Add a new RSS/Atom feed (requires login) |
-| `follow <id>` | Follow a feed by its ID (requires login) |
+| `follow <url>` | Follow a feed by its ID (requires login) |
 | `following`   | List feeds you are following (requires login) |
-| `unfollow <id>` | Unfollow a feed (requires login) |
+| `unfollow <url>` | Unfollow a feed (requires login) |
 | `browse`      | Browse posts from your followed feeds (requires login) |
 
 ---
@@ -152,7 +149,7 @@ npm run start addfeed <url>
 <summary><code>follow &lt;feed_id&gt;</code> – Follow a feed by its ID</summary>
 
 ```bash
-npm run start follow <feed_id>
+npm run start follow <url>
 ```
 </details>
 
@@ -172,7 +169,7 @@ npm run start following
 <summary><code>unfollow &lt;feed_id&gt;</code> – Unfollow a feed</summary>
 
 ```bash
-npm run start unfollow <feed_id>
+npm run start unfollow <url>
 ```
 </details>
 
