@@ -3,7 +3,9 @@ import { setUser, readConfig } from "./config";
 import { createUser, getUser, resetDB, getUsers, getUserbyID } from 'src/lib/db/queries/users'
 import { XMLParser } from "fast-xml-parser";
 import { addFeed, getFeeds, getFeed, createFeedFollow, getFeedFollowsForUser, getFeedbyID, deleteFeedFollow, getNextFeedToFetch, markFeedFetched } from "./lib/db/queries/feeds";
-import { type Feed, type User } from "./lib/db/schema";
+import { type Feed, type User, type Post } from "./lib/db/schema";
+import { error } from "console";
+import { createPost, getPostsbyFeedid, getPostsUrls } from "./lib/db/queries/posts";
 
 type RSSFeed = {
     channel: {
@@ -13,12 +15,13 @@ type RSSFeed = {
         item: RSSItem[];
     };
 };
-
-type RSSItem = {
+export type RSSItem = {
     title: string,
     link: string,
     description: string,
-    pubDate: string
+    pubDate: string,
+
+
 };
 // utilities
 
@@ -107,54 +110,74 @@ function printFeed(feed: Feed, user: User) {
     console.log(`* Created by:    ${user.name}`);
 }
 async function scrapeFeeds() {
-  const feed = await getNextFeedToFetch();
-  if (!feed) {
-    console.log(`No feeds to fetch.`);
-    return;
-  }
-  console.log(`Found a feed to fetch!`);
+    const feed = await getNextFeedToFetch();
+    if (!feed) {
+        console.log(`No feeds to fetch.`);
+        return;
+    }
+    console.log(`Found a feed to fetch!`);
 
-  await markFeedFetched(feed.id);
+    await markFeedFetched(feed.id);
 
-  const feedData = await fetchFeed(feed.url);
+    const feedData = await fetchFeed(feed.url);
 
-  console.log(
-    `Feed ${feed.name} collected, ${feedData.channel.item.length} posts found`,
-  );
+    console.log(
+        `Feed ${feed.name} collected, ${feedData.channel.item.length} posts found`,
+    );
+    const allPosts = await getPostsUrls();
+    //console.log(allPosts);
 
-  for (const item of feedData.channel.item){
-    console.log('Content: ',item.title);
-  }
+    for (const item of feedData.channel.item) {
+        if (!allPosts.includes(item.link)) {
+            console.log('New post added:', (await createPost(feed, item)).title);
+        }
+
+    }
 }
-
 export function parseDuration(durationStr: string) {
-  const regex = /^(\d+)(ms|s|m|h)$/;
-  const match = durationStr.match(regex);
-  if (!match) return;
+    const regex = /^(\d+)(ms|s|m|h)$/;
+    const match = durationStr.match(regex);
+    if (!match) return;
 
-  if (match.length !== 3) return;
+    if (match.length !== 3) return;
 
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
-  switch (unit) {
-    case "ms":
-      return value;
-    case "s":
-      return value * 1000;
-    case "m":
-      return value * 60 * 1000;
-    case "h":
-      return value * 60 * 60 * 1000;
-    default:
-      return;
-  }
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+    switch (unit) {
+        case "ms":
+            return value;
+        case "s":
+            return value * 1000;
+        case "m":
+            return value * 60 * 1000;
+        case "h":
+            return value * 60 * 60 * 1000;
+        default:
+            return;
+    }
 }
-
 function handleError(err: unknown) {
-  console.error(
-    `Error scraping feeds: ${err instanceof Error ? err.message : err}`,
-  );
+    console.error(
+        `Error scraping feeds: ${err}`,
+    );
 }
+
+async function getPostsForUser(user: User, limit: number = 2) {
+    const feedFollows = await getFeedFollowsForUser(user.id);
+    if (!feedFollows) {
+        console.log('User does not follow any feeds');
+        return;
+    }
+    const followList = []
+    for (const item of feedFollows) {
+        followList.push(item.feed_id);
+    }
+    const posts = await getPostsbyFeedid(followList, limit);
+        for(const post of posts){
+            console.log(post.title);
+        }
+    }
+
 // Command handlers 
 export async function loginHandler(cmdName: string, ...args: string[]) {
     if (args.length === 0) {
@@ -181,8 +204,8 @@ export async function registerUserHandler(cmdName: string, ...args: string[]) {
     }
     else {
         //console.log('No user found. calling createUser');
-        if(await createUser(name))
-        console.log(`User ${name} created successfully`);
+        if (await createUser(name))
+            console.log(`User ${name} created successfully`);
         setUser(name);
 
         //console.log(await getUser(name));
@@ -205,35 +228,35 @@ export async function listHandler(cmdName: string) {
     };
 }
 export async function aggHandler(cmdName: string, ...args: string[]) {
-  
+
     if (args.length !== 1) {
-    throw new Error(`usage: ${cmdName} <time_between_reqs>`);
-  }
+        throw new Error(`usage: ${cmdName} <time_between_reqs>`);
+    }
 
-  const timeArg = args[0];
-  const timeBetweenRequests = parseDuration(timeArg);
-  if (!timeBetweenRequests) {
-    throw new Error(
-      `invalid duration: ${timeArg} — use format 1h 30m 15s or 3500ms`,
-    );
-  }
+    const timeArg = args[0];
+    const timeBetweenRequests = parseDuration(timeArg);
+    if (!timeBetweenRequests) {
+        throw new Error(
+            `invalid duration: ${timeArg} — use format 1h 30m 15s or 3500ms`,
+        );
+    }
 
-  console.log(`Collecting feeds every ${timeArg}...`);
+    console.log(`Collecting feeds every ${timeArg}...`);
 
-  // run the first scrape immediately
-  scrapeFeeds().catch(handleError);
-
-  const interval = setInterval(() => {
+    // run the first scrape immediately
     scrapeFeeds().catch(handleError);
-  }, timeBetweenRequests);
 
-  await new Promise<void>((resolve) => {
-    process.on("SIGINT", () => {
-      console.log("Shutting down feed aggregator...");
-      clearInterval(interval);
-      resolve();
+    const interval = setInterval(() => {
+        scrapeFeeds().catch(handleError);
+    }, timeBetweenRequests);
+
+    await new Promise<void>((resolve) => {
+        process.on("SIGINT", () => {
+            console.log("Shutting down feed aggregator...");
+            clearInterval(interval);
+            resolve();
+        });
     });
-  });
 }
 export async function feedsHandler(cmdName: string) {
 
@@ -280,6 +303,7 @@ export async function followHandler(cmdName: string, user: User, ...args: string
 }
 export async function followingHandler(cmdName: string, user: User) {
     const follows = await getFeedFollowsForUser(user.id);
+    const followList = [];
     for (const item of follows) {
         const feed = await getFeedbyID(item.feed_id);
         printFeed(feed, user);
@@ -293,4 +317,15 @@ export async function unfollowHandler(cmdName: string, user: User, ...args: stri
     const feed = await getFeed(url);
     const deleted = await deleteFeedFollow(user.id, feed.id);
     console.log('Unfollowed: ', (await getFeedbyID(deleted.feed_id)).name, 'for', user.name);
+}
+
+export async function browseHandler(cmdName: string, user: User, ...args: string[]) {
+    const lim = Number(args[0]);
+    if (lim) {
+        //console.log(`reached ${cmdName}`);
+        await getPostsForUser(user, lim);
+    } else {
+        console.log(`Warning: usage ${cmdName} <number>`);
+        await getPostsForUser(user);
+    }
 }

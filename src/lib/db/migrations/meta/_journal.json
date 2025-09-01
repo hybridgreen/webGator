@@ -36,6 +36,20 @@
       "when": 1756705821146,
       "tag": "0004_parallel_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1756709097250,
+      "tag": "0005_stiff_impossible_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1756711467489,
+      "tag": "0006_natural_tusk",
+      "breakpoints": true
     }
   ]
 }

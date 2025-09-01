@@ -18,6 +18,7 @@ async function main() {
   registerCommand(registry, "follow", userLoggedIn(utils.followHandler));
   registerCommand(registry, "following", userLoggedIn(utils.followingHandler));
   registerCommand(registry, "unfollow", userLoggedIn(utils.unfollowHandler));
+  registerCommand(registry, "browse", userLoggedIn(utils.browseHandler));
 
   const args = process.argv.slice(2);
   if (args.length < 1) {

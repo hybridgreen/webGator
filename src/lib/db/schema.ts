@@ -1,7 +1,8 @@
 
 import { pgTable, timestamp, uuid, text, unique } from "drizzle-orm/pg-core";
-export type Feed = typeof feeds.$inferSelect; // feeds is the table object in schema.ts
-export type User = typeof users.$inferSelect; // feeds is the table object in schema.ts
+export type Feed = typeof feeds.$inferSelect;
+export type User = typeof users.$inferSelect;
+export type Post = typeof posts.$inferInsert;
 
 export const users = pgTable('users', {
     id: uuid('id').primaryKey().defaultRandom().notNull(),
@@ -31,12 +32,12 @@ export const feeds_follow = pgTable('feeds_follow',{
 ]);
 
 export const posts = pgTable('posts',{
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid('id').primaryKey().defaultRandom().notNull(),
     created_at: timestamp('created_at').notNull().defaultNow(),
     updated_at: timestamp('updated_at').notNull().defaultNow().$onUpdate(()=> new Date()),
     title: text('Title').notNull(),
-    url: text('URL').notNull(),
+    url: text('URL').notNull().unique(),
     description: text('Description'),
-    published_at: text('Published'),
+    published_at: text('Published').notNull(),
     feed_id: text('Feed_id').notNull()
 });
