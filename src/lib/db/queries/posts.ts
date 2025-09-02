@@ -1,7 +1,7 @@
 import { db } from '..';
-import { posts, type Post, type Feed } from '../schema';
-import { and, eq, inArray, sql } from 'drizzle-orm';
-import { type RSSItem } from 'src/utils'; 
+import { posts, type Feed } from '../schema';
+import { inArray, sql } from 'drizzle-orm';
+import { type RSSItem } from 'src/commands/utils'; 
 
 export async function createPost(feed: Feed, post: RSSItem) {
     const publishedDate = String(new Date(post.pubDate));

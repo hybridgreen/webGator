@@ -1,6 +1,6 @@
-import { readConfig } from "./config";
-import { getUser } from "./lib/db/queries/users";
-import { User } from "./lib/db/schema";
+import { readConfig } from "../config";
+import { getUser } from "../lib/db/queries/users";
+import { User } from "../lib/db/schema";
 
 
 type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;

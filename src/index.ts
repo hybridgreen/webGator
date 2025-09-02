@@ -1,24 +1,29 @@
-import { setUser, readConfig, Config} from "./config";
-import { type CommandsRegistry, registerCommand, runCommand, userLoggedIn} from "./commands";
-import * as utils from "./utils";
 
+import { type CommandsRegistry, registerCommand, runCommand, userLoggedIn} from "./commands/commands";
+import { resetHandler, aggHandler } from "./commands/utils";
+import { loginHandler, listHandler, registerUserHandler, browseHandler} from "./commands/users";
+import { feedsHandler, addFeedHandler } from "./commands/feeds";
+import { followHandler, followingHandler, unfollowHandler } from "./commands/feedfollow";
 
 async function main() {
   //console.log("[main] starting. argv =", process.argv.slice(2));
   const registry: CommandsRegistry = {};
 
-  registerCommand(registry, "login", utils.loginHandler);
-  registerCommand(registry, "register", utils.registerUserHandler);
-  registerCommand(registry, "reset", utils.resetHandler);
-  registerCommand(registry, "users", utils.listHandler);
-  registerCommand(registry, "agg", utils.aggHandler);
-  registerCommand(registry, "feeds", utils.feedsHandler);
+  registerCommand(registry, "reset", resetHandler);
+  registerCommand(registry, "agg", aggHandler);
 
-  registerCommand(registry, "addfeed", userLoggedIn(utils.addFeedHandler));
-  registerCommand(registry, "follow", userLoggedIn(utils.followHandler));
-  registerCommand(registry, "following", userLoggedIn(utils.followingHandler));
-  registerCommand(registry, "unfollow", userLoggedIn(utils.unfollowHandler));
-  registerCommand(registry, "browse", userLoggedIn(utils.browseHandler));
+  registerCommand(registry, "login", loginHandler);
+  registerCommand(registry, "register", registerUserHandler);
+  registerCommand(registry, "users", listHandler);
+
+  registerCommand(registry, "feeds", feedsHandler);
+  registerCommand(registry, "addfeed", userLoggedIn(addFeedHandler));
+  
+  registerCommand(registry, "follow", userLoggedIn(followHandler));
+  registerCommand(registry, "following", userLoggedIn(followingHandler));
+  registerCommand(registry, "unfollow", userLoggedIn(unfollowHandler));
+
+  registerCommand(registry, "browse", userLoggedIn(browseHandler));
 
   const args = process.argv.slice(2);
   if (args.length < 1) {
