@@ -190,8 +190,8 @@ npm run start browse
 - The `reset` command will clear **all users and feeds** — use with caution.
 
 ## Future Improvements
--Add bookmarking or liking posts
--Add a search command that allows for fuzzy searching of posts
--Add an HTTP API (and authentication/authorization) that allows other users to interact with the service remotely
--Add a TUI that allows you to select a post in the terminal and view it in a more readable format (either in the terminal or open in a browser)
+- Add bookmarking or liking posts
+- Add a search command that allows for fuzzy searching of posts
+- Add an HTTP API (and authentication/authorization) that allows other users to interact with the service remotely
+- Add a TUI that allows you to select a post in the terminal and view it in a more readable format (either in the terminal or open in a browser)
 
